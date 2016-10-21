@@ -60,9 +60,7 @@ Aim to get all possible sets of LUT splits.
 
 set1=x[0]
 print_list_of_nodes(set1)
-tree_list.remove(set1)
 
-print_list_of_nodes(tree_list)
 
 
 

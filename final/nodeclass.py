@@ -21,7 +21,7 @@ class Stack:
 # Tree node
 class Node:
 
-	def __init__(self, operator=None. name=None, left=None, right=None):
+	def __init__(self, operator=None, left=None, right=None , name=None):
 		"""(Node, object, Node, Node) -> NoneType
 		Initialize this node to store item and have children left and right.
 		"""
@@ -29,7 +29,7 @@ class Node:
 		self.operator = operator
 		self.left = left
 		self.right = right
-    self.name=name
+		self.name=name
 
 	def depth(self):
 		# Base Case : Leaf node.This acoounts for height = 0

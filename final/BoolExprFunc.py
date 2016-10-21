@@ -32,20 +32,27 @@ def infixToPostfix(infixexpr):
 
 def postfix_2_tree(postfix_list):
 	nodes_list=Stack()
+	fulllist=list()
 	for token in postfix_list.split():
 		if token in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" or token in "0123456789":
-			nodes_list.push(Node(token))
+			x= Node(token)
+			fulllist.append(x)
+			nodes_list.push(x)
 		elif token == '~':
 			left_node = nodes_list.pop()
-			nodes_list.push(Node(token,left_node))
+			x= Node(token,left_node)
+			fulllist.append(x)
+			nodes_list.push(x)
 		elif token in '&|^':
 			left_node = nodes_list.pop()
-			right_node = nodes_list.pop()		
-			nodes_list.push(Node(token,left_node,right_node))
-  for i in range(len(nodes_list)):
-      nodelist[i].name= "n"+str(i)+"_"+nodelist[i].operator
+			right_node = nodes_list.pop()
+			x= Node(token,left_node,right_node)
+			fulllist.append(x)
+			nodes_list.push(x)
+	for i in range(len(fulllist)):
+		fulllist[i].name= "n"+str(i)+"_"+fulllist[i].operator
 
-	return nodes_list.pop(),nodes_list
+	return nodes_list.pop(),fulllist
 
 
 
