@@ -1,9 +1,10 @@
-import copy
 from nodeclass import *
 
 
 ###########################################################################
-
+""" 
+Returns the list of tuples of size 2, such that it's sum = input value provided
+"""
 def get_list_of_tuples(value):
 	sets=[]
 	for i in range(value+1):
@@ -12,35 +13,13 @@ def get_list_of_tuples(value):
 				sets.append((i,j))
 	return sets
 
-###########################################################################		
-#This function gives lists of subtrees each formed by straight path,
-#i.e., no branching in the subtrees
-
-def get_lists_of_StraightNodesList_recurr(remainingsize ,slist , root,bigBucket):
-		
-	if root == None or root.depth() == 0 or remainingsize == 0:
-		return
-
-	slist.append(root)
-
-	#To check if node is  an inverter
-	if root.left != None and root.right == None:
-		get_lists_of_StraightNodesList_recurr(remainingsize ,slist, root.left,bigBucket)	
-
-
-	if remainingsize != 1 :
-		slist_copy=[]
-		slist_copy=copy.deepcopy( slist )
-
-		get_lists_of_StraightNodesList_recurr(remainingsize-1 ,slist, root.left,bigBucket)
-		get_lists_of_StraightNodesList_recurr(remainingsize-1 ,slist_copy , root.right,bigBucket)
-
-	if remainingsize == 1 or root.depth() == 1 :
-		bigBucket.append(slist)
-		return refine_List_of_Lists(bigBucket)
 
 ###########################################################################		
-
+"""
+There is possibility that, in a list of trees, A tree can be a part of another 
+tree in the list. Such tree is redundant.
+This function removes such trees.So that computation  recurence is minimized
+"""
 def refine_List_of_Lists(alist):
 	alist.sort(key=len)
 	alll=[]
@@ -49,9 +28,7 @@ def refine_List_of_Lists(alist):
 		smallindexlist.reverse()
 		if not any((all(any(n.name == o.name for o in alist[x]) for n in alist[j]) )for x in smallindexlist) :
 			alll.append(alist[j])
-
-
-	#remove extra nodes from each list
+	#remove extra nodes from each list if present
 	ref=[]
 	for list1 in alll:
 		list2 = []    
@@ -62,110 +39,113 @@ def refine_List_of_Lists(alist):
 			if not i.name in names:
 				list2.append(i)
 		ref.append(list2)
-	
 	return ref
-
-
+	
+	
+	
 ###########################################################################		
-def getsubTree(noOfNodes,root):
-	alllist=[]
+"""
+Returns all possible set of subtrees having root_node.
+Inverter node is not considered while counting Number of Nodes to be present
+in a subtree.
 
-	if noOfNodes == 1 or root.depth() == 1:
+"""
+def getsubTree_lists(noOfNodes, root):
+	if root.depth() == 0 or noOfNodes == 0:
+		return [[]]
+		
+	if root.depth() == 1:
 		return [[root]]
-	else:
-		if not ( root.left != None and root.right == None):
-			noOfNodes = noOfNodes - 1
-		
-	for i in get_list_of_tuples(noOfNodes):	
-		bigBucket=list()
-		if root.left!=None:
-			get_lists_of_StraightNodesList_recurr(i[0],[],root.left,bigBucket)
-			leftlist=bigBucket
-		else:
-			leftlist=[]
-		
-		bigBucket=list()
-		if root.right!=None:
-			get_lists_of_StraightNodesList_recurr(i[1],[],root.right,bigBucket)
-			rightlist=bigBucket
-		else:
-			rightlist=[]
-		
-		if leftlist == [] and rightlist != []:
-			for j in rightlist:
-				alllist.append(list(set( [root] + j)))
-
-		elif leftlist != [] and rightlist == []:
-			for j in leftlist:
-				alllist.append(list(set( j + [root])))
-
-		else:
-			for j in leftlist:
-				for k in rightlist:
-					alllist.append(list(set(j + [root] + k )))
-	return alllist
-
-
-###########################################################################		
-
-def getsubTree_lists(noOfNodes_in_LUT , root):
-	alllist=[]
-
-	if noOfNodes_in_LUT == 1 :
-		if  ( root.left != None and root.right == None):#if inverter
-			return [[root,root.left]]
-		else:
+	
+	if noOfNodes == 1:
+		if not ( root.left != None and root.right == None):#if not inverter
 			return [[root]]
-
-
-	if root.depth()== 1:
-		return [[root]]
-	
-	noOfNodes_in_LUT = noOfNodes_in_LUT -1	
-	
-	for i in get_list_of_tuples(noOfNodes_in_LUT):	
-		if root.left!=None:
-			left_list_of_list=getsubTree(i[0],root.left)
 		else:
-			left_list_of_list=[[]]
-		
-		if root.right!=None:
-			right_list_of_list=getsubTree(i[1],root.right)
-		else:
-			right_list_of_list=[[]]
+			return [[root,root.left]]
 
-		if left_list_of_list == [] and right_list_of_list != []:
-			for j in right_list_of_list:
-				alllist.append(list(set( [root] + j )))
-		
-		elif left_list_of_list != [] and right_list_of_list == []:
-			for j in left_list_of_list:
-				alllist.append(list(set( j + [root] )))
-		
+	if 	not ( root.left != None and root.right == None):#if not inverter
+		noOfNodes = noOfNodes -1
+
+	list1=[]
+	for i in get_list_of_tuples(noOfNodes):
+		if 	not ( root.left != None and root.right == None):#if not inverter
+			left_list_of_lists = getsubTree_lists( i[0], root.left)
+			right_list_of_lists = getsubTree_lists(i[1] , root.right)
 		else:
-			for j in left_list_of_list:
-				for k in right_list_of_list:
-					alllist.append(list(set(j + [root] + k )))
+			left_list_of_lists = getsubTree_lists( i[0], root.left)
+			right_list_of_lists = [[]]		
+		list1.extend ([l + r for l in left_list_of_lists for r in right_list_of_lists ])
+	[A.append(root) for A in list1]
+	return refine_List_of_Lists(list1)
+
 	
+###########################################################################		
+"""
+Below print functions are used to display the objects in terms of their attribute "name"
+for easy understandability.
 
-	return refine_List_of_Lists(alllist)
+"""
+def print_list_of_lists_of_lists_nodes(allist):
+	for index,sub in enumerate(allist):
+		#print "index = ",index
+		print("Length = " ,len(sub))
+		for a in sub:
+			print("[", end=" ")
+			for k in a:
+				print( k.name, ",", end=" ")
+			print("] ", end=" ")
+		print()
 
 ###########################################################################		
-
 
 def print_lists_of_lists_of_nodes(alllist):
 	for a in alllist:
 		for k in a:
-			print k.name, " " ,
-		print ""
+			print(k.name, " ", end=" ")
+		print()
 
 ###########################################################################		
 
 def print_list_of_nodes(a):
 	for k in a:
-		print k.name, " " ,
-	print ""
-
+		print(k.name, " ", end=" ")
+	print()
 ###########################################################################		
 
+"""
+Since we are comparing nodes which are objects.
+Comparision is used considering the name, to be on safer side
 
+Not necessary!!!
+"""
+def getremainingNodes_list(allNodes_list,removeNodes_list ):
+	if all(isinstance(elem, list) for elem in removeNodes_list):
+		removeNodes_list = sum( removeNodes_list , []) 
+	otherNodes_list=[]
+	otherNodes_list = list(filter(lambda x: x not in removeNodes_list and x.depth()!=0,allNodes_list))
+	otherNodes_list.sort(key=lambda x: x.depth(), reverse=True)
+	return otherNodes_list
+
+###########################################################################		
+"""
+This function provides all possible "list of subtrees" which represent the
+boolean expression given.
+  
+"""
+def  all_possible_LUT_cuts(combinations,final_list,tree_list, Number_of_Nodes):	
+	if combinations == []:
+		combinations=getsubTree_lists( Number_of_Nodes, tree_list[0])
+		combinations = [[x] for x in combinations]
+	for comb in combinations:
+		remainigNodes =[]
+		remainigNodes =  getremainingNodes_list(tree_list , comb)
+		
+		if  remainigNodes == []:
+			final_list.append(comb)
+		else:
+			subtree1 = getsubTree_lists (Number_of_Nodes,remainigNodes[0])
+			combinations2 =[]
+			for i in subtree1:
+				a=comb+[i]
+				combinations2.append(a)
+			all_possible_LUT_cuts(combinations2,final_list,tree_list, Number_of_Nodes)
