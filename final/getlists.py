@@ -68,17 +68,16 @@ def getsubTree_lists(noOfNodes, root):
 
 	list1=[]
 	for i in get_list_of_tuples(noOfNodes):
+		left_list_of_lists = getsubTree_lists( i[0], root.left)
 		if 	not ( root.left != None and root.right == None):#if not inverter
-			left_list_of_lists = getsubTree_lists( i[0], root.left)
 			right_list_of_lists = getsubTree_lists(i[1] , root.right)
 		else:
-			left_list_of_lists = getsubTree_lists( i[0], root.left)
 			right_list_of_lists = [[]]		
 		list1.extend ([l + r for l in left_list_of_lists for r in right_list_of_lists ])
 	[A.append(root) for A in list1]
 	return refine_List_of_Lists(list1)
 
-	
+
 ###########################################################################		
 """
 Below print functions are used to display the objects in terms of their attribute "name"

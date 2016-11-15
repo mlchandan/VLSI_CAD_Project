@@ -87,6 +87,7 @@ function returns the boolean expression for that subtree.
 """
 def getBoolExpression(node, node_list):
 	node_list_name =[x.name for x in node_list]
+
 	if node.name in node_list_name:
 		if node.operator == "~":
 			return "~"+" ( "+getBoolExpression(node.left,node_list)+" )"

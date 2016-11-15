@@ -2,12 +2,16 @@
 from nodeclass import *
 from BoolExprFunc import *
 from getlists import *
-import graphviz as gv
+
+
+import matplotlib.ticker as plticker
+import networkx as nx
+import matplotlib.pyplot as plt
 
 ###########################################################################		
 
 #Initilisations
-Expression= "  ~ ( A  | ( B   &  C ) ) ^  ( D | E )  & ( F   &  E ) & ( V  &  W ) "
+Expression= "  ~ ( A  | ( B   &  C ) ) ^  ( D | E ) ^  ( D | E ) &  ( A  | ( B   &  C ) ) ^  ( D | E ) ^  ( D | E ) "
 LUT_input_size=6
 
 ###########################################################################		
@@ -46,7 +50,44 @@ for i in tree_list:
 		print(i.right.name)
 	else:
 		print(None)
+
+###########################################################################	
+nodes_list =[]
+for i in tree_list:
+	print(i.name , " ", end=" ")
+	if i.left != None:
+		nodes_list.append((i.name , i.left.name ) )
+	if i.right != None:
+		nodes_list.append((i.name , i.right.name ) )
+
+def  hierarchy_pos(tree_list, root,width=1., vert_gap = 0.2, vert_loc = 0,pos= None, xcenter = 0.5):
+	top_depth = tree_list[0].depth( )
+	if pos == None:
+		pos = {tree_list[0].name:(xcenter,vert_loc)}
 	
+	for a in range(top_depth):
+		neighbors=[x for x in tree_list if x.depth() == a]
+		print_list_of_nodes(neighbors)
+		vert_loc = ( a - top_depth )*vert_gap
+		for  indx, neighbor in  enumerate( neighbors ):
+				hor_gap =   width / (len( neighbors ) + 1 )
+				hor_loc =   hor_gap * (indx+1)
+				pos[neighbor.name] = (hor_loc, vert_loc)
+	return pos
+
+edge_colors =range(len(nodes_list))
+pos = hierarchy_pos( tree_list, tree_list[0] )
+G=nx.MultiGraph()
+G.add_edges_from(nodes_list)#rgbwcmy
+nx.draw(G,node_size=1500,pos = pos, with_labels=True ,node_color='c',\
+        edge_color=edge_colors,width=2,edge_cmap=plt.cm.Blues)
+#plt.show()
+plt.savefig("img/Tree_diagram.png") # save as png
+
+
+
+
+
 ###########################################################################
 
 
@@ -83,6 +124,27 @@ print_list_of_lists_of_lists_nodes(result)
 print("\n\nSelected LUT cut = ")
 set1 = result[0]
 print_lists_of_lists_of_nodes(set1)
+
+
+#nx.draw(G,node_size=1000,pos = pos, with_labels=True ,node_color='b',edge_color='r',width=3)
+#plt.axis('off')
+#plt.show()
+
+colors='rgbwcmy' 
+shapes ='ho'  #shov^
+
+G=nx.Graph()
+G.add_edges_from(nodes_list)
+input_node_names = [x.name for x in tree_list if x.depth()==0]
+nx.draw(G,pos, nodelist=input_node_names, node_size=1500,\
+  node_color=colors[4], with_labels=True,node_shape='s',edge_color=edge_colors,width=4,edge_cmap=plt.cm.Blues)
+for indx,each_set in enumerate(set1):
+	nx.draw(G,pos, nodelist=[x.name for x in each_set], node_size=1500,\
+	node_color=colors[indx % len(colors)], with_labels=True,node_shape=shapes[indx % len(shapes)],\
+	edge_color=edge_colors,width=3,edge_cmap=plt.cm.Blues)
+#plt.show()
+plt.savefig("img/After_partitioning.png") # save as png
+
 
 
 ###########################################################################

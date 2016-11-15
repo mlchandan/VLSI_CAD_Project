@@ -111,6 +111,7 @@ class LUT:
 			if self.input_renamed[indx] == '-':
 				input_str+='0'
 			else:
+				
 				Ainput_name = self.input_renamed[indx]
 				if Ainput_name in all_inputs:
 					input_str+= str(binary_input_dictionary[Ainput_name])
